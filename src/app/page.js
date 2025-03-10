@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Header from '../components/Header';
 import SearchFilters from '../components/SearchFilters';
-import StatsCards from '../components/StatsCards';
+import StatsCards from '../components/Statscards';
 import ApplicationsTable from '../components/ApplicationsTable';
 import ApplicationDetails from '../components/ApplicationDetails';
 import { fetchTransactionData } from '../utils/api';
