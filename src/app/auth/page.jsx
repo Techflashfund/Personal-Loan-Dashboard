@@ -92,7 +92,7 @@ export default function AdminLoginPage() {
                     href="/admin/forgot-password" 
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
-                    Forgot?
+                    
                   </Link>
                 </div>
                 <div className="relative">
@@ -143,13 +143,13 @@ export default function AdminLoginPage() {
             </form>
             
             <div className="mt-4 text-center text-sm text-slate-600">
-              <p>
-                Need support?{' '}
-                <Link href="/admin/support" className="text-blue-600 hover:text-blue-800 font-medium">
-                  Contact admin
-                </Link>
-              </p>
-            </div>
+  <p>
+    Need support?{' '}
+    <Link href="https://www.flashfund.in" className="text-blue-600 hover:text-blue-800 font-medium">
+      Contact admin
+    </Link>
+  </p>
+</div>
 
             <div className="mt-4 pt-3 border-t border-blue-200">
               <p className="text-xs text-center text-slate-500">
