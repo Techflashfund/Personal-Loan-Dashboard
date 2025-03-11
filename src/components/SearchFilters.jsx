@@ -16,7 +16,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export default function SearchFilters({ date, setDate }) {
+export default function SearchFilters({ 
+  date, 
+  setDate, 
+  filters, 
+  setFilters, 
+  clearAllFilters 
+}) {
+  // Ensure date is a valid Date object
+  const validDate = date instanceof Date && !isNaN(date.getTime()) ? date : new Date();
+  
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm mb-8 border border-gray-100">
       <div className="flex flex-wrap gap-4">
@@ -26,11 +35,16 @@ export default function SearchFilters({ date, setDate }) {
               type="text"
               placeholder="Search applications..."
               className="pl-10 border-gray-200 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
+              value={filters.searchQuery || ''}
+              onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           </div>
         </div>
-        <Select>
+        <Select
+          value={filters.status || 'all'}
+          onValueChange={(value) => setFilters({...filters, status: value})}
+        >
           <SelectTrigger className="w-[180px] border-gray-200 rounded-lg bg-white">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -45,19 +59,38 @@ export default function SearchFilters({ date, setDate }) {
           <PopoverTrigger asChild>
             <Button variant="outline" className="rounded-lg border-gray-200 bg-white hover:bg-gray-50 cursor-pointer">
               <span className="mr-2 text-blue-500">📅</span>
-              {format(date, 'PP')}
+              {filters.dateFilter ? format(filters.dateFilter, 'PP') : 'Select Date'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-            />
+            <div className="p-3">
+              <Calendar
+                mode="single"
+                selected={filters.dateFilter}
+                onSelect={(newDate) => {
+                  setDate(newDate || new Date());
+                  setFilters({...filters, dateFilter: newDate});
+                }}
+                className="rounded-md border"
+              />
+              {filters.dateFilter && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="mt-2 w-full text-slate-600"
+                  onClick={() => setFilters({...filters, dateFilter: null})}
+                >
+                  Clear Date
+                </Button>
+              )}
+            </div>
           </PopoverContent>
         </Popover>
-        <Button variant="ghost" className="rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
+        <Button 
+          variant="ghost" 
+          className="rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer"
+          onClick={clearAllFilters}
+        >
           <span className="mr-2">🔄</span>
           Clear Filters
         </Button>

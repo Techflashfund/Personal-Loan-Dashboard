@@ -1,49 +1,32 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import useAuthStore from '@/store/store';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
+  
+  // Get state and actions from auth store
+  const { login, isLoading, error, isAuthenticated } = useAuthStore();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
     
-    // Simulate authentication - replace with your actual auth logic
-    try {
-      // Example authentication check
-      const response = await fetch('https://pl.pr.flashfund.in/auth/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Authentication failed');
-      }
-      
-      // Store token and admin info in localStorage or use a state management solution
-      localStorage.setItem('adminToken', data.token);
-      localStorage.setItem('adminInfo', JSON.stringify(data.admin));
-      
-      // Redirect to dashboard
+    const result = await login(email, password);
+    
+    if (result.success) {
       router.push('/');
-    } catch (err) {
-      setError('Authentication failed. Please try again.');
-      console.error('Login error:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -143,11 +126,11 @@ export default function AdminLoginPage() {
               
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className={`w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-medium text-center transition-all 
-                  ${loading ? 'bg-blue-400 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                  ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'hover:bg-blue-700'}`}
               >
-                {loading ? (
+                {isLoading ? (
                   <span className="flex items-center justify-center">
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -219,7 +202,6 @@ export default function AdminLoginPage() {
           `}</style>
           <div className="text-center">
             <span className="loader"></span>
-            
           </div>
         </div>
       </div>

@@ -10,10 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
-export default function ApplicationsTable({ applications, loading, setSelectedApplication, setSidebarOpen }) {
-    console.log("applications",applications);
-    
+export default function ApplicationsTable({ 
+  applications, 
+  loading, 
+  setSelectedApplication, 
+  setSidebarOpen,
+  filters,
+  setFilters
+}) {
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'approved':
@@ -37,6 +43,27 @@ export default function ApplicationsTable({ applications, loading, setSelectedAp
     if (progress >= 70) return 'bg-green-500';
     if (progress >= 50) return 'bg-amber-500';
     return 'bg-red-500';
+  };
+
+  // Function to handle sorting
+  const handleSort = (field) => {
+    setFilters({
+      ...filters,
+      sortBy: field,
+      sortDirection: 
+        filters.sortBy === field && filters.sortDirection === 'desc' 
+          ? 'asc' 
+          : 'desc'
+    });
+  };
+
+  // Function to display sort indicators
+  const renderSortIndicator = (field) => {
+    if (filters.sortBy !== field) return null;
+    
+    return filters.sortDirection === 'asc' 
+      ? <ChevronUp className="inline h-4 w-4" /> 
+      : <ChevronDown className="inline h-4 w-4" />;
   };
 
   // Function to format transaction data to match application structure
@@ -67,59 +94,95 @@ export default function ApplicationsTable({ applications, loading, setSelectedAp
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50">
-                <TableHead className="text-slate-600 font-medium">Application ID</TableHead>
-                <TableHead className="text-slate-600 font-medium">Applicant</TableHead>
-                <TableHead className="text-slate-600 font-medium">Amount</TableHead>
-                <TableHead className="text-slate-600 font-medium">Date</TableHead>
-                <TableHead className="text-slate-600 font-medium">Status</TableHead>
-                <TableHead className="text-slate-600 font-medium">Progress</TableHead>
-                
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('id')}
+                >
+                  Application ID {renderSortIndicator('id')}
+                </TableHead>
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('name')}
+                >
+                  Applicant {renderSortIndicator('name')}
+                </TableHead>
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('amount')}
+                >
+                  Amount {renderSortIndicator('amount')}
+                </TableHead>
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('date')}
+                >
+                  Date {renderSortIndicator('date')}
+                </TableHead>
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('status')}
+                >
+                  Status {renderSortIndicator('status')}
+                </TableHead>
+                <TableHead 
+                  className="text-slate-600 font-medium cursor-pointer hover:text-blue-600"
+                  onClick={() => handleSort('riskScore')}
+                >
+                  Progress {renderSortIndicator('riskScore')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {displayApplications.map((app) => (
-                <TableRow 
-                  key={app.id} 
-                  className="cursor-pointer hover:bg-slate-50 transition-colors duration-150" 
-                  onClick={() => {
-                    setSelectedApplication(app.id);
-                    setSidebarOpen(true);
-                  }}
-                >
-                  <TableCell className="font-medium text-blue-600">{app.id}</TableCell>
-                  <TableCell className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8 bg-blue-100">
-                      <AvatarFallback className="text-xs text-blue-600">
-                        {app.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    {app.name}
+              {displayApplications.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                    No applications match your search criteria
                   </TableCell>
-                  <TableCell className="font-medium">
-                    {app.amount === 'N/A' ? 'N/A' : `$${typeof app.amount === 'number' ? app.amount.toLocaleString() : app.amount}`}
-                  </TableCell>
-                  <TableCell>{app.date}</TableCell>
-                  <TableCell>
-                    <Badge className={`${getStatusColor(app.status)} px-3 py-1 rounded-full text-xs font-medium`}>
-                      {app.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <span className={`mr-2 font-medium ${getProgressColor(app.riskScore)}`}>
-                        {app.riskScore}%
-                      </span>
-                      <div className="w-24 h-2 bg-gray-100 rounded-full">
-                        <div
-                          className={`h-full rounded-full ${getProgressBarColor(app.riskScore)}`}
-                          style={{ width: `${Math.min(app.riskScore, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </TableCell>
-                 
                 </TableRow>
-              ))}
+              ) : (
+                displayApplications.map((app) => (
+                  <TableRow 
+                    key={app.id} 
+                    className="cursor-pointer hover:bg-slate-50 transition-colors duration-150" 
+                    onClick={() => {
+                      setSelectedApplication(app.id);
+                      setSidebarOpen(true);
+                    }}
+                  >
+                    <TableCell className="font-medium text-blue-600">{app.id}</TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8 bg-blue-100">
+                        <AvatarFallback className="text-xs text-blue-600">
+                          {app.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      {app.name}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {app.amount === 'N/A' ? 'N/A' : `${typeof app.amount === 'number' ? app.amount.toLocaleString() : app.amount}`}
+                    </TableCell>
+                    <TableCell>{app.date}</TableCell>
+                    <TableCell>
+                      <Badge className={`${getStatusColor(app.status)} px-3 py-1 rounded-full text-xs font-medium`}>
+                        {app.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <span className={`mr-2 font-medium ${getProgressColor(app.riskScore)}`}>
+                          {app.riskScore}%
+                        </span>
+                        <div className="w-24 h-2 bg-gray-100 rounded-full">
+                          <div
+                            className={`h-full rounded-full ${getProgressBarColor(app.riskScore)}`}
+                            style={{ width: `${Math.min(app.riskScore, 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         )}
